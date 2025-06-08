@@ -1,0 +1,42 @@
+/* Style for Orskyan heading */
+.orskyan-heading {
+    text-align: center;
+    color: #007bff; /* Blue color */
+    text-shadow: 2px 2px 4px #000000; /* Shadow effect */
+    font-size: 36px;
+    margin-bottom: 30px; /* Add some space below */
+}
+
+/* Style for the container of the boxes */
+.box-container {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    margin-top: 50px; /* Add some space above */
+}
+
+/* Style for the boxes */
+.box {
+    width: 200px;
+    height: 200px;
+    background-color: #f0f0f0;
+    border: 2px solid #007bff; /* Blue border */
+    border-radius: 10px;
+    margin-bottom: 20px; /* Add some space below */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.box:hover {
+    transform: scale(1.05); /* Zoom effect on hover */
+}
+
+/* Style for the box content */
+.box-content {
+    color: #007bff; /* Blue color */
+    font-size: 20px;
+}

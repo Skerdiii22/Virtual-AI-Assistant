@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indoor Navigation</title>
+    <style>
+        /* Style for the map */
+        #map {
+            height: 400px;
+            width: 100%;
+        }
+
+        /* Style for the class names */
+        .class {
+            cursor: pointer;
+            text-decoration: underline;
+            color: black;
+        }
+
+        /* Style for the route */
+        .route {
+            color: blue;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <!-- Map -->
+    <div id="map"></div>
+
+    <!-- Class names -->
+    <div class="class" id="a1">a1</div>
+    <div class="class" id="b1">b1</div>
+    <div class="class" id="c1">c1</div>
+
+    <!-- JavaScript for map and interaction -->
+    <script>
+        // Define coordinates for hall and class a1
+        const hallCoords = [
+            { lat: 41.342384, lng: 19.8450387 },
+            { lat: 41.3423609, lng: 19.8450204 },
+            { lat: 41.3423501, lng: 19.844975 },
+            { lat: 41.3423781, lng: 19.844967 },
+            { lat: 41.342384, lng: 19.8450387 } // Closing the rectangle
+        ];
+
+        const a1Coords = [
+            { lat: 41.3423353, lng: 19.844965 },
+            { lat: 41.3423679, lng: 19.8449398 },
+            { lat: 41.3423903, lng: 19.844936 },
+            { lat: 41.3423501, lng: 19.844975 },
+            { lat: 41.3423353, lng: 19.844965 } // Closing the rectangle
+        ];
+
+        let map;
+        let userMarker;
+
+        // Initialize the map
+        function initMap() {
+            map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 18,
+                center: hallCoords[0], // Center map at the hall
+            });
+
+            // Draw hall
+            const hall = new google.maps.Polygon({
+                paths: hallCoords,
+                strokeColor: "#FF0000",
+                strokeOpacity: 0.8,
+                strokeWeight: 2,
+                fillColor: "#FF0000",
+                fillOpacity: 0.35,
+            });
+            hall.setMap(map);
+
+            // Add event listeners to class names
+            document.getElementById("a1").addEventListener("click", function() {
+                navigateTo(a1Coords);
+            });
+
+            // Add other event listeners for other classes similarly...
+        }
+
+        // Function to get user's location and navigate to destination
+        function navigateTo(destinationCoords) {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(position => {
+                    const userPosition = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+
+                    // Remove previous user marker
+                    if (userMarker) {
+                        userMarker.setMap(null);
+                    }
+
+                    // Add new user marker
+                    userMarker = new google.maps.Marker({
+                        position: userPosition,
+                        map: map,
+                        icon: {
+                            path: google.maps.SymbolPath.CIRCLE,
+                            scale: 7,
+                            fillColor: "blue",
+                            fillOpacity: 1,
+                            strokeWeight: 1,
+                            strokeColor: "black"
+                        }
+                    });
+
+                    // Calculate route
+                    const routeCoords = [userPosition, ...destinationCoords];
+                    const routePath = new google.maps.Polyline({
+                        path: routeCoords,
+                        geodesic: true,
+                        strokeColor: "#0000FF",
+                        strokeOpacity: 0.8,
+                        strokeWeight: 4,
+                    });
+                    routePath.setMap(map);
+
+                    // Zoom map to fit both user and destination
+                    const bounds = new google.maps.LatLngBounds();
+                    bounds.extend(userPosition);
+                    bounds.extend(destinationCoords[0]);
+                    map.fitBounds(bounds);
+                }, () => {
+                    alert("Geolocation failed. Please enable location access.");
+                });
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
+        }
+    </script>
+    <script
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAOVYRIgupAurZup5y1PRh8Ismb1A3lLao&callback=initMap&libraries=&v=weekly"
+        async
+    ></script>
+</body>
+</html>
+

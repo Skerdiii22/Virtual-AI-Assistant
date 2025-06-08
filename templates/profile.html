@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orskyan</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='profile1.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='chb.css') }}">
+</head>
+<body>
+
+<h1 class="orskyan-heading">Orskyan</h1>
+
+<!-- Container for the boxes -->
+<div class="box-container">
+    <!-- Box 1 - Indoor Navigation -->
+    <div class="box">
+        <a href="{{ url_for('indoor_navigation') }}?user_id={{ session.user_id }}">
+            <div class="box-content">
+                Indoor Navigation
+            </div>
+        </a>
+    </div>
+
+    <!-- Box 2 - Absence Taker -->
+    <div class="box">
+        <a href="{{ url_for('absence_taker') }}?user_id={{ session.user_id }}">
+            <div class="box-content">
+                Absence Taker
+            </div>
+        </a>
+    </div>
+
+    <!-- Box 3 - Total Attendance -->
+    <div class="box">
+        <a href="{{ url_for('start_attendance') }}?user_id={{ session.user_id }}">
+            <div class="box-content">
+                Total Attendance
+            </div>
+        </a>
+    </div>
+
+    <!-- Box 4 - Teacher Site, for now lets leave it handle_attendance-->
+    <div class="box">
+        <a href="{{ url_for('start_attendance') }}?user_id={{ session.user_id }}">
+            <div class="box-content">
+                Teacher Site
+            </div>
+        </a>
+    </div>
+</div>
+
+<div class="container">
+    <div class="chatbox">
+        <div class="chatbox__support">
+            <div class="chatbox__header">
+                <div class="chatbox__image--header">
+                    <img src="https://img.icons8.com/color/48/000000/circled-user-female-skin-type-5--v1.png" alt="image">
+                </div>
+                <div class="chatbox__content--header">
+                    <h4 class="chatbox__heading--header">Chat support</h4>
+                    <p class="chatbox__description--header">Hi. My name is Anwel. How can I help you?</p>
+                </div>
+            </div>
+            <div class="chatbox__messages">
+                <div></div>
+            </div>
+            <div class="chatbox__footer">
+                <input type="text" placeholder="Write a message...">
+                <button class="chatbox__send--footer send__button">Send</button>
+            </div>
+        </div>
+        <div class="chatbox__button">
+            <button><img src="{{ url_for('static', filename='images/memo_7.png') }}"  alt=""/></button>
+        </div>
+    </div>
+</div>
+
+<script>
+    $SCRIPT_ROOT = {{ request.script_root|tojson }};
+
+    function sendLocationToServer(latitude, longitude) {
+        fetch(`${$SCRIPT_ROOT}/submit_location`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ latitude: latitude, longitude: longitude })
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Success:', data);
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
+    }
+
+    function getLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                var lat = position.coords.latitude;
+                var lng = position.coords.longitude;
+                console.log(`Latitude: ${lat}, Longitude: ${lng}`);
+                sendLocationToServer(lat, lng);
+            });
+        } else {
+            console.error("Geolocation is not supported by this browser.");
+        }
+    }
+
+    // Call getLocation when the page loads
+    window.onload = getLocation;
+</script>
+<script type="text/javascript" src="{{ url_for('static', filename='app.js') }}"></script>
+
+</body>
+</html>

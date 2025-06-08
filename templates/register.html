@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Registration</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            padding: 20px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        form {
+            max-width: 400px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box; /* Ensure padding doesn't affect width */
+        }
+
+        #camera {
+            margin-bottom: 15px;
+        }
+
+        canvas {
+            display: none; /* Hide canvas by default */
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h2>User Registration</h2>
+    <form id="registrationForm" action="/register" method="POST" enctype="multipart/form-data">
+        <label for="first_name">First Name:</label>
+        <input type="text" id="first_name" name="first_name" required>
+
+        <label for="last_name">Last Name:</label>
+        <input type="text" id="last_name" name="last_name" required>
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required>
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+
+        <label for="study_program">Study Program:</label>
+        <select id="study_program" name="study_program" required>
+            <option value="">Select Program</option>
+            <option value="Computer Science">Computer Science</option>
+            <option value="Engineering">Engineering</option>
+            <!-- Add more options as needed -->
+        </select>
+
+        <label for="year_of_study">Year of Study:</label>
+        <input type="number" id="year_of_study" name="year_of_study" min="1" max="6" required>
+
+        <!-- Video feed from camera -->
+        <video id="camera" width="100%" height="auto" autoplay></video>
+
+        <!-- Canvas for capturing photo -->
+        <canvas id="photoCanvas" width="400" height="300"></canvas>
+
+        <!-- Button to capture photo -->
+        <button id="captureBtn" type="button">Take Photo</button>
+
+        <!-- Hidden input field to store the photo data -->
+        <input type="hidden" id="photoData" name="photoData">
+
+        <button type="submit">Register</button>
+    </form>
+<script type="text/javascript">
+  (function(d, t) {
+      var v = d.createElement(t), s = d.getElementsByTagName(t)[0];
+      v.onload = function() {
+        window.voiceflow.chat.load({
+          verify: { projectID: '6669a22d4934ae46b90c593f' },
+          url: 'https://general-runtime.voiceflow.com',
+          versionID: 'production'
+        });
+      }
+      v.src = "https://cdn.voiceflow.com/widget/bundle.mjs"; v.type = "text/javascript"; s.parentNode.insertBefore(v, s);
+  })(document, 'script');
+</script>
+    <script>
+        const video = document.getElementById('camera');
+        const canvas = document.getElementById('photoCanvas');
+        const photoDataInput = document.getElementById('photoData');
+        const captureBtn = document.getElementById('captureBtn');
+
+        // Access the user's camera
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                video.srcObject = stream;
+            })
+            .catch(err => {
+                console.error('Error accessing camera:', err);
+            });
+
+        // Capture photo from video feed
+        captureBtn.addEventListener('click', () => {
+            const context = canvas.getContext('2d');
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    // Resize the image to reduce its size
+    const resizedCanvas = document.createElement('canvas');
+    const resizedContext = resizedCanvas.getContext('2d');
+    resizedCanvas.width = 400;  // Adjust as needed
+    resizedCanvas.height = 300;  // Adjust as needed
+    resizedContext.drawImage(canvas, 0, 0, resizedCanvas.width, resizedCanvas.height);
+    const resizedData = resizedCanvas.toDataURL('image/jpeg', 0.5);  // Adjust quality as needed
+
+    photoDataInput.value = resizedData; // Store resized photo data in hidden input field
+        });
+    </script>
+</body>
+</html>
