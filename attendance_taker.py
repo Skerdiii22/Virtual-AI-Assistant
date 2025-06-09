@@ -8,9 +8,13 @@ import logging
 import os
 from skimage.metrics import structural_similarity as ssim
 from cv2 import data
+import subprocess
+import platform
+
 
 # Set environment variable to skip OpenCV AVFoundation authorization
 os.environ["OPENCV_AVFOUNDATION_SKIP_AUTH"] = "1"
+
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -18,7 +22,7 @@ logging.basicConfig(level=logging.DEBUG)
 # Load the pre-trained face detection model
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
-# Ensure you have installed opencv-contrib-python
+
 recognizer = cv2.face.LBPHFaceRecognizer_create()
 model_path = 'models/face_recognizer.yml'
 if os.path.exists(model_path):
@@ -31,13 +35,34 @@ else:
 db_connection = mysql.connector.connect(
     host="localhost",
     user="root",
-    password="",  # Enter your MySQL password
-    database="Thesis"  # Enter your database name
+    password="",
+    database="Thesis"
 )
 cursor = db_connection.cursor()
 
 # Load timetable from CSV file
 timetable = pd.read_csv("timetable.csv")
+DESIRED_SSID = 'CITWIFI 5GHz'
+
+
+def get_current_ssid():
+    try:
+        if platform.system() == 'Windows':
+            result = subprocess.check_output(["netsh", "wlan", "show", "interfaces"])
+            for line in result.decode('utf-8').split('\n'):
+                if "SSID" in line and "BSSID" not in line:
+                    return line.split(":")[1].strip()
+        elif platform.system() == 'Linux':
+            result = subprocess.check_output(["iwgetid", "-r"])
+            return result.decode('utf-8').strip()
+        elif platform.system() == 'Darwin':  # macOS
+            result = subprocess.check_output(["/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport", "-I"])
+            for line in result.decode('utf-8').split('\n'):
+                if " SSID" in line:
+                    return line.split(":")[1].strip()
+    except Exception as e:
+        logging.error(f"Error fetching SSID: {e}")
+        return None
 
 def get_current_course():
     now = datetime.now()
@@ -96,11 +121,11 @@ def is_user_within_rectangle(user_coords, rectangle_coords):
     return is_within
 
 rectangle_coords = [
-    (41.35, 19.78),         # Top-left (Northwest)
-    (41.35, 19.8842004),    # Top-right (Northeast)
-    (41.30, 19.8842004),    # Bottom-right (Southeast)
-    (41.30, 19.78),         # Bottom-left (Southwest)
-    (41.35, 19.78)          # Closing the rectangle (same as top-left)
+    (41.35, 19.78),
+    (41.35, 19.8842004),
+    (41.30, 19.8842004),
+    (41.30, 19.78),
+    (41.35, 19.78)
 ]
 
 
@@ -114,6 +139,11 @@ def compare_images(img1, img2):
         return False
 
 def take_attendance(latitude, longitude, user_id):
+    current_ssid = get_current_ssid()
+    if current_ssid != DESIRED_SSID:
+        logging.info(
+            f"Not connected to the desired SSID: {DESIRED_SSID}. Current SSID: {current_ssid}. Aborting attendance process.")
+        return {"error": f"Not connected to the desired SSID: {DESIRED_SSID}"}
     user_id = user_id
     current_class, start_time_str = get_current_course()
     if current_class and start_time_str:
